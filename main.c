@@ -7,6 +7,8 @@
 #include <stdbool.h>
 #include <time.h>
 #include <unistd.h>
+#include "display.h"
+#include "files.h"
 //Code Update; Basic add and delete - 12/21/2024
 //Works through scan-f 
 //Task: create a function that creates a file of the family_tree when creating a family tree
@@ -29,15 +31,14 @@ int tree_count = 0;
 
  }Node;
 //Function Prototypes
+ int create_tree();//rheina
+    void display_employees_by_level(Node* current);
+    void display_commission_by_level(Node* head);
+    void postorder_traversal(Node* root);
+    void distribute_wealth_to_parent(Node* child_node, const char* filename);
    Node* create_node(const char* name, const char* business_name,const char* role ,float wealth, float commissioned_earned);//rheina 12/14/2024
-    int create_tree();//rheina
-    void display_family_trees();//rheina
-    void delete_all_family_files();//rheina
-    void delete_family_file();//rheina
-    void add_family_member();//tugad
     bool member_exists(const char* family_file, const char* member_name);//Kirt
     void print_branch(const Node* root, int depth);
-    void display_family_tree(const char* family_name);//Rose mae 
     int parent_exists(FILE* file, const char* parent_name);//Rose mae
     Node* find_parent(Node* root, const char* parent_name);//Rose mae 
     Node* read_family_data(const char* filename);//Rheina
@@ -59,20 +60,15 @@ int tree_count = 0;
     float generate_investment_profit(float investment, int investment_type, float loss_margin);
     void employee_invest(Node* employee,const char* company_name, const char* file_name);
     void update_member_in_file(const char* filename, Node* member);
-    void redistribute_wealth(const char* filename);
-   void distribute_wealth_to_employees(const char* filename);
+  
    void log_investment_progress(const char* company_name, Node* employee, int investment_type, float investment, float profit, float commission);
-   void display_investment_progress(const char* company_name);
-   void display_employees_by_level(Node* current);
-   void display_commission_by_level(Node* head);
-   void postorder_traversal(Node* root);
-   void display_progress_bar_investment();
-   void display_progress_bar_company();
-   void display_progress_bar_distribution();
-
+  
+   
  //MAIN METHOD 
-    //TASKS AYOHA ANG MAIN METHOD
+    
     int main (){
+
+    int choice_66,enter;
     srand(time(NULL));
     int choice;
     char family_name[MAX_NAME_LENGTH];
@@ -82,67 +78,67 @@ int tree_count = 0;
     Node* employee = NULL;
     
 
-    //Task clean menu kaw
-    while (1) {
-      
-    printf("\n------------------- Investment Management -------------------\n");
-    printf("\n1.Start A Company\n");
-    printf("2. Add Employees\n");
-    printf("3. Fire Employee\n");
-    printf("5. Start Investing\n");
-    printf("6. Search Company Member\n");
-    printf("7. Redistribute and Calculate Company Wealth\n");
-    printf("8. Distribute to Wealth To Employees\n");
-    printf("9. Display Company Member and Logs\n");
-    printf("10. Exit\n");
-    printf("11. Delete A Company File\n");
-    printf("12. Store Company Members on Nodes\n");
-    printf("13. Display A Company Members through Hierachy and Binary Traversals\n");
-    printf("-------------------------------------------------------------\n");
     
-    printf("Enter your choice: ");
+    while (1) {
+        
+
+        
+        display_menu();
+        
+    
+    
+        printf("Enter your choice: ");
         scanf("%d", &choice);
 
         // Handle user's choice
         switch (choice) {
             
             case 1:
-            //Start A Company
+            //Company option
             printf("Starting A Company \n");
             
             create_tree(); 
-
             display_progress_bar_company();
-            printf("Done Creating A Company\n: ");
+
+            printf("\nDone Creating A Company\n: ");
+            printf("\nPress 1 To Continue: ");
+            scanf("%d", &enter);
              
             break;
 
             case 2:
-            //Add Employee
+            //Employee Option
             printf("\nAvailable Companies \n");
             display_family_trees();
 
             printf("\nEnter THe Company to store them to Nodes: ");
-        
-            scanf("%s", family_name);
+            while (getchar() != '\n' && getchar() != EOF);
+            fgets(family_name, sizeof(family_name), stdin);
+            family_name[strcspn(family_name, "\n")] = 0;
+
             snprintf(family_filename, sizeof(family_filename), "family_trees/%s.txt", family_name);
 
             add_family_member(); // can now stored
             
             head = store_family_data(family_filename);
-            
             printf("\nRecruitment Done\n");
+
+            printf("\nPress 1 To Continue: ");
+            scanf("%d", &enter);
              
                 break;
 
             case 3:
-            //Fire Employee
+            //Layoff Option
                 printf("\nAvailable Companies \n");
                 display_family_trees();
 
                 printf("\nChoose company to Layoff An Employee:");
                 
-                scanf("%s", family_name);
+                while (getchar() != '\n' && getchar() != EOF);
+                fgets(family_name, sizeof(family_name), stdin);
+                family_name[strcspn(family_name, "\n")] = 0;
+
                 snprintf(family_filename, sizeof(family_filename), "family_trees/%s.txt", family_name);
                 print_tree(head);
                 
@@ -150,17 +146,18 @@ int tree_count = 0;
                 scanf("%s", member_name);
 
                 delete_member_from_file(family_filename,member_name);
+                printf("\nPress 1 To Continue: ");
+                scanf("%d", &enter);
                 break;
             case 4:
-           //Easter Egg
-               printf("We dont talk about Number 4 @!*#!@*** !@*#*!@ #elp ");
-                break;
-            case 5:
             //Investment
             printf("Choose a Company To Start investing\n");
             display_family_trees();
 
-            scanf("%s", family_name);
+            while (getchar() != '\n' && getchar() != EOF);
+            fgets(family_name, sizeof(family_name), stdin);
+            family_name[strcspn(family_name, "\n")] = 0;
+
             snprintf(family_filename, sizeof(family_filename), "family_trees/%s.txt", family_name);
 
             display_family_tree(family_name);
@@ -178,17 +175,17 @@ int tree_count = 0;
                 } else {
                     printf("Employee '%s' not found in the family tree.\n", member_name);
                 }
+               
                 break;
-            case 6:
-            //Search Member in Tree
-        
+            case 5:
             char search_name[100];
 
             printf("Choose a Company To Search A Member\n");
             
             display_family_trees();
 
-            scanf("%s", family_name);
+            scanf("%s",family_name); // Remove newline character
+
             snprintf(family_filename, sizeof(family_filename), "family_trees/%s.txt", family_name);
 
             head = store_family_data(family_filename);
@@ -207,51 +204,115 @@ int tree_count = 0;
                found_member->name, found_member->business_name, found_member->role, found_member->wealth, found_member->level, found_member->parent->name);
              } else {
             printf("Member %s not found in the family tree.\n", search_name);
-            }
+            }          
+
+            printf("\nPress 1 To Continue: ");
+            scanf("%d", &enter);
+                break;
+           
+            case 6:
+            int choice_company = 0;
+            printf("Choose a Company To Access Accounting Quarters\n");
+            display_family_trees();
+
+            printf("\nEnter Company Name\n");
+
+            scanf("%s", family_name);
+
+            snprintf(family_filename, sizeof(family_filename), "family_trees/%s.txt", family_name);
+            head = store_family_data(family_filename);
+                
+                while(choice_company != 5){
+                    
+                    printf("\nWelcome to The %s Accounting Quarters\n", family_name);
+
+                    printf("\n1.Display Investment Progress\n");
+                    printf("2.Distribute Wealth To Employees(CEO)\n");
+                    printf("3.Distribute Profit Back To Recruiters\n");
+                    printf("4.Distribute all profits back to CEO\n");
+                    printf("5.Return to Menu\n");
+
+                    printf("\nEnter Choice:\n");
+                    scanf("%d",&choice_company);
+                    switch(choice_company){
+                        case 1:
+                          
+                        printf("Company Comission Members\n");
+                        display_commission_by_level(head);
+
+                        display_investment_progress(family_name);
+                        printf("\nPress 1 To Continue: ");
+                        scanf("%d", &enter);
+
+                        break;
+
+                        case 2:
+
+                        display_progress_bar_distribution();
+                        distribute_wealth_to_employees(family_filename);
+                        head = store_family_data(family_filename);
+
+                        printf("\nPress 1 To Continue: ");
+                        scanf("%d", &enter);
+
+                        break;
+
+                        case 3:
+
+                        print_tree(head);
+
+                        printf("\nEnter the name of the member to search: ");
+                        
+                        scanf("%s", search_name);
+
+                        Node* company_member = store_family_data(family_filename);
+                            company_member = search_member(head, search_name);
+                       
+                            if (company_member != NULL) {
+                            printf("\nMember found: %s, Business: %s, Role: %s, Wealth: $ %.2f, Level: %d\n,Recruiter: %s\n",
+                            company_member->name, company_member->business_name, company_member->role, company_member->wealth, company_member->level, company_member->parent->name);
+                            } else 
+                                {
+                                printf("Member %s not found in the family tree.\n", search_name);
+                                } 
+                        display_progress_bar_distribution();
+                        distribute_wealth_to_parent(company_member, family_filename);
+                        head = store_family_data(family_filename);
+
+                        printf("\nPress 1 To Continue: ");
+                        scanf("%d", &enter);
+                        
+                        break;
+
+                        case 4:
+                            display_progress_bar_distribution();
+                            
+                            redistribute_wealth(family_filename);
+                            display_family_tree(family_name);
+
+                            printf("\nPress 1 To Continue: ");
+                            scanf("%d", &enter);
+
+                        break;
+
+                        case 5:
+
+                        printf("Returning to Menu\n");
+                        choice_company = 5;
+
+                        break;
+
+                        default:
+                        printf("Invalid choice! Please try again.\n");
+                        break;
+                    }
+                }
+            
 
 
-            break;
+             break;
                 
             case 7:
-            //Redistribution
-            printf("\nAvailable Companies For ReDistribution\n");
-            display_family_trees();
-
-            printf("\nEnter Company Name");
-
-            scanf("%s", family_name);
-            snprintf(family_filename, sizeof(family_filename), "family_trees/%s.txt", family_name);
-            
-          
-            display_progress_bar_distribution();
-            
-            display_family_tree(family_name);
-           
-            redistribute_wealth(family_filename);
-
-            printf("Company Members Wealth Redistribution Updates:\n");
-            display_family_tree(family_name);
-                
-                break;
-            case 8:
-            //Wealth Distribution To Employees
-            printf("\nAvailable Companies For Wealth Distribution\n");
-            display_family_trees();
-
-            printf("\nEnter Company Name");
-
-            scanf("%s", family_name);
-            snprintf(family_filename, sizeof(family_filename), "family_trees/%s.txt", family_name);
-
-            display_progress_bar_distribution();
-            distribute_wealth_to_employees(family_filename);
-
-    
-       
-        
-                break;
-            case 9:
-
             display_family_trees();
             printf("\nEnter Company Name: ");
 
@@ -261,34 +322,28 @@ int tree_count = 0;
             head = store_family_data(family_filename);
             
             printf("Company Comission Members\n");
-            display_commission_by_level(head);
             
-
+            display_family_tree(family_name);
+            display_commission_by_level(head);
             display_investment_progress(family_name);
 
-            break;
-            case 10:
-            exit(1);
+            printf("\nPress 1 To Continue: ");
+            scanf("%d", &enter);
             
-            break;
-
-            case 11:
+            
+                
+                break;
+            case 8:
             display_family_trees();
             delete_family_file();
-            break;
 
-            case 12:
-            display_family_trees();
+            printf("\nPress 1 To Continue: ");
+            scanf("%d", &enter);
+                break;
             
-            printf("\nEnter THe Company to store them to Nodes:(ENABLE BINARY FUNCTIONS TO WORK)");
-            scanf("%s", family_name);
-            snprintf(family_filename, sizeof(family_filename), "family_trees/%s.txt", family_name);
-            
-            head = read_family_data(family_filename);
-            break;
-
-            case 13:
-            int input;
+            case 9:
+    
+            int input = 0;
             printf("\nCompany Hierachy\n");
             display_family_trees();
             printf("\nEnter Company Name: ");
@@ -302,9 +357,11 @@ int tree_count = 0;
 
             
 
+            
+
             while(input != 4){
                 
-            printf("1.Inorder Travesal\n");
+            printf("\n1.Inorder Travesal\n");
             printf("2.Preorder Travesal\n");
             printf("3.PostOrder Travesa\n");
             printf("4.Return Menu\n");
@@ -315,16 +372,25 @@ int tree_count = 0;
                     case 1:
                     printf("\nInorder Travesal\n");
                     inorder_traversal(head);
+
+                    printf("\nPress 1 To Continue\n");
+                    scanf("%d", &enter);
                     break;
                     
                     case 2:
                     printf("\nPreorder Travesal\n");
                     preorder_traversal(head);
+
+                    printf("\nPress 1 To Continue\n");
+                    scanf("%d", &enter);
                     break;
 
                     case 3:
                     printf("\nPostOrder Travesal\n");
                     postorder_traversal(head);
+
+                     printf("\nPress 1 To Continue\n");
+                    scanf("%d", &enter);
                     break;
 
                     case 4:
@@ -338,8 +404,23 @@ int tree_count = 0;
 
                 }
             }
-         break;
-            case 14:
+
+           
+
+            break;
+            case 10:
+            exit(1);
+            
+            break;
+
+
+            case 66:
+            
+            printf("We dont talk about Number 66 @!*#!@*** !@*#*!@ #elp ");
+            delete_all_family_files();
+            printf("Press To Continue\n");
+            scanf("%d", &choice_66);
+
 
             break;
 
@@ -442,7 +523,7 @@ void print_tree(Node* root) {
         return;
     }
 
-    printf("Node: %s, Level: %d, Wealth: %.2f , Parent: %s\n", root->name, root->level, root->wealth,root->parent ? root->parent->name : "NULL");
+    printf("Member: %s, Level: %d, Wealth: %.2f , Recruiter: %s\n", root->name, root->level, root->wealth,root->parent ? root->parent->name : "NULL");
     print_tree(root->left);
     print_tree(root->right);
 }
@@ -525,7 +606,7 @@ Node* store_family_data(const char* filename) {
         if (root == NULL) {
             root = new_member; 
             root->level = 0;
-            printf("Done Adding to Binary Nodes");
+            printf("\nDone Adding to Binary Nodes\n");
             
         } else {
             root = insert_node(root, new_member);    
@@ -577,11 +658,11 @@ int create_tree() { // Rheina // Change
     // Set Starting Wealth (Current Wealth) to 100,000 Pesos
     float current_wealth = 100000.0;
 
-    printf("Enter Head Member's Business Name: ");
+    printf("Enter Head Member's Business Type: ");
     fgets(business, sizeof(business), stdin);
     business[strcspn(business, "\n")] = 0;  // Remove trailing newline
     
-    printf("\nStarting Wealth 100k");
+    printf("\nStarting Wealth $100k");
 
     // Write root member details to the file
     fprintf(family_file, "Head,%s,%.2f,%s,%d\n", 
@@ -771,127 +852,115 @@ void delete_family_file() {//Working, 12/21/2024 it now delete
         printf("Error updating family_trees.txt\n");
     }
 }
-void add_family_member() {//okay na
+void add_family_member() {
+    // Display all family trees
+    char family_name[100];
+    printf("\nEnter the name of the company to modify: ");
+    scanf("%s", family_name);
 
-   // Display all family trees
+    // Build the family file path
+    char family_file[110];
+    snprintf(family_file, sizeof(family_file), "family_trees/%s.txt", family_name);
 
-
-// Select a family tree
-char family_name[100];
-printf("\nEnter the name of the company  to modify: ");
-scanf("%s", family_name);
-
-// Build the family file path
-char family_file[110];
-snprintf(family_file, sizeof(family_file), "family_trees/%s.txt", family_name);
-
-FILE* file = fopen(family_file, "r+");  // Open for reading and writing
-if (file == NULL) {
-    printf("\nCompany tree '%s' does not exist.\n", family_name);
-    return;
-}
-
-// Step 1: Read root member details to get remaining wealth and land
-char root_name[MAX_NAME_LENGTH], spouse_name[MAX_NAME_LENGTH] = "N/A";
-char date_of_birth[20], status[20], business[100] , profession[100];
-float root_wealth, root_land, remaining_wealth, remaining_land,comissioned_earners,inheritance_wealth, inheritance_land,head_commissions;
-int found_root = 0;
-char line[256];
-
-if (fgets(line, sizeof(line), file)) {
-    // Print the raw line to verify its format
-    printf("Raw line: %s\n", line);
-
-    // Match root format: ROOT,Name,DOB,Status,N/A,Wealth,Business,Land
-    if (strncasecmp(line, "Head,", 5) == 0) {
-        // Try parsing with the expected format
-        int num_parsed = sscanf(line, 
-                                 "Head,%99[^,],%f,%99[^,],%f\n",
-                                 root_name, &root_wealth, business, &head_commissions);
-
-        // Debugging: Print the number of parsed values
-        printf("Parsed %d values\n", num_parsed);
-        
-        // If sufficient values were parsed, process them
-    }
-}
-
-printf("Root Member: %s\n", root_name);
-printf("Business: %s\n", business);
-printf("Remaining Wealth: %.2f\n", root_wealth);
-
-
-remaining_wealth = root_wealth;
-
-// Step 2: Input new member details
-Node* new_member = (Node*)malloc(sizeof(Node));
-new_member->name = (char*)malloc(100 * sizeof(char));
-fseek(file, 0, SEEK_SET);  // Reset file pointer
-FILE* temp_file = fopen("temp.txt", "w");
-
-while ((getchar()) != '\n' && getchar() != EOF);  // Clear input buffer
-printf("\nEnter member details:\n");
-
-printf("Name: ");
-fgets(new_member->name, 100, stdin);
-size_t len = strlen(new_member->name);
-if (len > 0 && new_member->name[len - 1] == '\n') {
-    new_member->name[len - 1] = '\0';
-}
-
-// Ask if the member is allowed to inherit from the predecessor
-printf("\nGrant Recruit Investment Money? (1 for Yes, 2 for No): ");
-int permit;
-scanf("%d", &permit);
-// Initialize inherited wealth
-
-if (permit == 1) {
-    printf("Enter starting  investment Money (%.2f available): ", remaining_wealth);
-    scanf("%f", &inheritance_wealth);
-
-    if (inheritance_wealth > remaining_wealth) {
-        printf("\nError: Inherited wealth exceeds remaining wealth of the root member.\n");
-        free(new_member->name);
-        free(new_member);
-        fclose(file);
+    FILE* file = fopen(family_file, "r+");  // Open for reading and writing
+    if (file == NULL) {
+        printf("\nCompany tree '%s' does not exist.\n", family_name);
         return;
     }
 
-    // Update the remaining wealth of the root
-    remaining_wealth -= inheritance_wealth;
-    root_wealth = remaining_wealth;
-}
+    // Step 1: Read root member details to get remaining wealth and land
+    char root_name[MAX_NAME_LENGTH], business[100];
+    float root_wealth, head_commissions;
+    char line[256];
 
-// Write the root line with the updated wealth only once
-rewind(file);
-int root_written = 0;  // Flag to check if head has been written
-while (fgets(line, sizeof(line), file)) {
-    if (strstr(line, "Head,")) {  // Match the head line
-        if (!root_written) {
-            // Write the head line with the updated wealth only once
-            fprintf(temp_file, "Head,%s,%.2f,%s,%.2f\n", root_name, root_wealth, business, head_commissions);
-            root_written = 1;  // Set the flag to indicate that head has been written
+    if (fgets(line, sizeof(line), file)) {
+        printf("\nRaw line: %s\n", line);  // Debugging line
+
+        // Match root format: Head,Name,Wealth,Business,Commission
+        if (strncasecmp(line, "Head,", 5) == 0) {
+            int num_parsed = sscanf(line, 
+                                     "Head,%99[^,],%f,%99[^,],%f\n", 
+                                     root_name, &root_wealth, business, &head_commissions);
+
+            // Debugging
         }
-    } else {
-        fputs(line, temp_file);  // Write other lines unchanged
     }
+
+    printf("Root Member: %s\n", root_name);
+    printf("Business: %s\n", business);
+    printf("Remaining Wealth: %.2f\n", root_wealth);
+
+    float remaining_wealth = root_wealth;
+
+    // Step 2: Input new member details
+    Node* new_member = (Node*)malloc(sizeof(Node));
+    new_member->name = (char*)malloc(100 * sizeof(char));
+    fseek(file, 0, SEEK_SET);  // Reset file pointer
+    FILE* temp_file = fopen("temp.txt", "w");
+
+    while ((getchar()) != '\n' && getchar() != EOF);  // Clear input buffer
+    printf("\nEnter member details:\n");
+
+    printf("Name: ");
+    fgets(new_member->name, 100, stdin);
+    size_t len = strlen(new_member->name);
+    if (len > 0 && new_member->name[len - 1] == '\n') {
+        new_member->name[len - 1] = '\0';
+    }
+
+    // Ask if the member is allowed to inherit from the predecessor
+    printf("\nGrant Recruit Investment Money? (1 for Yes, 2 for No): ");
+    int permit;
+    scanf("%d", &permit);
+    float inheritance_wealth = 0;
+
+    if (permit == 1) {
+        printf("Enter starting investment Money ($%.2f available): ", remaining_wealth);
+        scanf("%f", &inheritance_wealth);
+
+        if (inheritance_wealth > remaining_wealth) {
+            printf("\nError: Inherited wealth exceeds remaining wealth of the root member.\n");
+            free(new_member->name);
+            free(new_member);
+            fclose(file);
+            return;
+        }
+
+        // Update the remaining wealth of the root
+        remaining_wealth -= inheritance_wealth;
+        root_wealth = remaining_wealth;
+    }
+
+    // Write the root line with the updated wealth only once
+    rewind(file);
+    int root_written = 0;  // Flag to check if head has been written
+    while (fgets(line, sizeof(line), file)) {
+        if (strstr(line, "Head,")) {  // Match the head line
+            if (!root_written) {
+                fprintf(temp_file, "Head,%s,%.2f,%s,%.2f\n", root_name, root_wealth, business, head_commissions);
+                root_written = 1;
+            }
+        } else {
+            fputs(line, temp_file);  // Write other lines unchanged
+        }
+    }
+
+    // Append new member details
+    fprintf(temp_file, "Employee,%s,%.2f,%s,0.00\n", new_member->name, inheritance_wealth, business);
+
+    // Close and replace the original file
+    fclose(file);
+    fclose(temp_file);
+    remove(family_file);
+    rename("temp.txt", family_file);
+
+    printf("\nMember '%s' successfully added.\n", new_member->name);
+
+    // Free new member memory
+    free(new_member->name);
+    free(new_member);
 }
 
-// Append new member details
-fprintf(temp_file, "Employee,%s,%.2f,%s,%.2f\n", new_member->name, inheritance_wealth,business,comissioned_earners);
-
-// Close and replace the original file
-fclose(file);
-fclose(temp_file);
-remove(family_file);
-rename("temp.txt", family_file);
-
-printf("\nMember '%s' successfully added.\n", new_member->name);
-
-// Free new member memory
-free(new_member->name);
-free(new_member);
-}
 bool member_exists(const char* family_file, const char* member_name) {//Working
     FILE* file = fopen(family_file, "r");
     if (file == NULL) {
@@ -1078,9 +1147,12 @@ void employee_invest(Node* employee, const char* company_name, const char* file_
 
     while (1) { // Start an infinite loop
         // Prompt user for investment type
+        display_diamond();
         printf("\nChoose an investment type:\n");
         printf("1. Crypto\n");
+        display_house();
         printf("2. Real Estate\n");
+
         printf("3. Business\n");
         printf("Enter your choice (1-3): ");
         scanf("%d", &investment_type);
@@ -1229,7 +1301,7 @@ void distribute_wealth_to_employees(const char* filename) {
     float head_wealth, head_commission;
     sscanf(lines[0], " %49[^,],%99[^,],%f,%99[^,],%f", head_role, head_name, &head_wealth, head_business, &head_commission);
 
-    printf("Head: %s\n", head_name);
+    printf("\nHead: %s\n", head_name);
     printf("Total Wealth Available for Distribution: %.2f\n", head_wealth);
 
     // Distribute wealth to employees
@@ -1277,21 +1349,6 @@ void distribute_wealth_to_employees(const char* filename) {
     fclose(file);
     printf("\nWealth distribution complete. File updated successfully.\n");
 }
-void print_menu() {
-
-       printf("\n------------------- Family Tree Management -------------------\n");
-    printf("1. Display Family Tree\n");
-    printf("2. Add New Family Member\n");
-    printf("3. Exit\n");
-    printf("4. Create Family Tree\n");
-    printf("5. Delete A Family File\n");
-    printf("6. Display Family Tree Members\n");
-    printf("7. Search and Add Metadata\n");
-    printf("8. Calculate Entire Networth of a Family\n");
-    printf("9. Start Business\n");
-    printf("-------------------------------------------------------------\n");
-    printf("Enter your choice: ");
-}
 void redistribute_wealth(const char* filename) {
     FILE* file = fopen(filename, "r");
     if (file == NULL) {
@@ -1319,6 +1376,9 @@ void redistribute_wealth(const char* filename) {
     float head_commission;
     sscanf(lines[head_line_index], " %99[^,],%99[^,],%f,%99[^,],%f", head_role, head_name, &head_wealth, head_business, &head_commission);
 
+    // Debug output to verify the parsed data
+    printf("Head: %s, Wealth: %.2f\n", head_name, head_wealth);
+
     // Process employee lines
     for (int i = 1; i < line_count; i++) {
         char role[100], name[100], business[100];
@@ -1326,6 +1386,9 @@ void redistribute_wealth(const char* filename) {
 
         // Parse the employee data
         sscanf(lines[i], " %99[^,],%99[^,],%f,%99[^,],%f", role, name, &wealth, business, &commission);
+
+        // Debug output to verify employee data
+        printf("Employee: %s, Wealth: %.2f\n", name, wealth);
 
         // Sum up the wealth and set it to 0
         employee_total_wealth += wealth;
@@ -1341,6 +1404,9 @@ void redistribute_wealth(const char* filename) {
     // Update the head's line
     snprintf(lines[head_line_index], sizeof(lines[head_line_index]), "%s,%s,%.2f,%s,%.2f", head_role, head_name, head_wealth, head_business, head_commission);
 
+    // Debug output to verify the new head wealth
+    printf("Updated Head: %s, New Wealth: %.2f\n", head_name, head_wealth);
+
     // Write the updated data back to the file
     file = fopen(filename, "w");
     if (file == NULL) {
@@ -1353,8 +1419,9 @@ void redistribute_wealth(const char* filename) {
     }
     fclose(file);
 
-    printf("Wealth redistribution complete! \n CEO '%s' total company networth $%.2f.\n", head_name, head_wealth);
+    printf("Wealth redistribution complete!\n");
 }
+
 void log_investment_progress(const char* company_name, Node* employee, int investment_type, float investment, float profit, float commission) {
     char progress_filename[150];
     snprintf(progress_filename, sizeof(progress_filename), "%s_progress.txt", company_name); // Generate filename
@@ -1512,7 +1579,7 @@ void display_progress_bar_distribution() {
         "Calculating individual shares and commissions...                  ",
         "Redistributing wealth accordingly...",
         "Finalizing adjustments and updating records...",
-        "Finalizing results"
+        "Finalizing results\n"
     };
 
     int total_steps = sizeof(messages) / sizeof(messages[0]);
@@ -1523,6 +1590,161 @@ void display_progress_bar_distribution() {
         fflush(stdout);
         sleep(1);
     }
-
+   printf("\n");
    
+}
+void distribute_wealth_to_parent(Node* child_node, const char* filename) {
+    if (child_node == NULL) {
+        printf("Invalid child node.\n");
+        return;
+    }
+
+    // Get the parent's name
+    char* parent_name = child_node->parent ? child_node->parent->name : NULL;
+    if (parent_name == NULL) {
+        printf("No parent found for the child node '%s'.\n", child_node->name);
+        return;
+    }
+
+    FILE* file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Error opening file for reading.\n");
+        return;
+    }
+
+    // Temporary storage for the file data
+    char lines[100][100]; // Assuming a maximum of 100 lines
+    int line_count = 0;
+
+    // Read all lines from the file
+    while (fgets(lines[line_count], sizeof(lines[line_count]), file) != NULL) {
+        // Remove newline characters if present
+        lines[line_count][strcspn(lines[line_count], "\n")] = 0;
+        line_count++;
+        if (line_count >= 100) {
+            printf("Warning: Maximum line count exceeded. Some data may not be processed.\n");
+            break; // Prevent buffer overflow
+        }
+    }
+    fclose(file);
+
+    float child_wealth = child_node->wealth;
+    float parent_wealth = 0;
+    char role[100], name[100], business[100];
+    float commission = 0;
+
+    // Find the child node and its wealth
+    int child_index = -1;
+    for (int i = 0; i < line_count; i++) {
+        if (sscanf(lines[i], " %99[^,],%99[^,],%f,%99[^,],%f", role, name, &child_wealth, business, &commission) == 5) {
+            // Check if the current node is the child node by matching the child's name
+            if (strcmp(name, child_node->name) == 0) {
+                child_index = i;
+                break;
+            }
+        }
+    }
+
+    if (child_index == -1) {
+        printf("Child node '%s' not found.\n", child_node->name);
+        return;
+    }
+
+    // Find the parent node by searching for the parent's name
+    int parent_index = -1;
+    for (int i = 0; i < line_count; i++) {
+        if (sscanf(lines[i], " %99[^,],%99[^,],%f,%99[^,],%f", role, name, &parent_wealth, business, &commission) == 5) {
+            if (strcmp(name, parent_name) == 0) {
+                parent_index = i;
+                break;
+            }
+        }
+    }
+
+    if (parent_index == -1) {
+        printf("Parent node '%s' not found.\n", parent_name);
+        return;
+    }
+
+    // Update the parent's wealth
+    sscanf(lines[parent_index], " %99[^,],%99[^,],%f,%99[^,],%f", role, name, &parent_wealth, business, &commission);
+    parent_wealth += child_wealth;
+
+    // Update the parent's line in the file
+    snprintf(lines[parent_index], sizeof(lines[parent_index]), "%s,%s,%.2f,%s,%.2f", role, name, parent_wealth, business, commission);
+
+    // Update the child's wealth to 0
+    child_wealth = 0;
+
+    // Update the child's line in the file
+    snprintf(lines[child_index], sizeof(lines[child_index]), "%s,%s,%.2f,%s,%.2f", child_node->role, child_node->name, child_wealth, business, commission);
+
+    // Write the updated data back to the file
+    file = fopen(filename, "w");
+    if (file == NULL) {
+        printf("Error opening file for writing.\n");
+        return;
+    }
+
+    // Write the updated lines with proper newlines for every entry
+    for (int i = 0; i < line_count; i++) {
+        fprintf(file, "%s\n", lines[i]);  // Always add a newline here
+    }
+
+    fclose(file);
+
+    printf("\nWealth distribution from child '%s' to parent '%s' complete!\n", child_node->name, parent_name);
+}
+
+
+void display_menu() {
+    const int console_width = 60;  // Adjust console width as needed
+    const char *menu_items[] = {
+        "1. Start A Company",
+        "2. Add Employees",
+        "3. Fire Employee",
+        "4. Simulate Investing",
+        "5. Search Company Member",
+        "6. Accounting Quarters (Profit Distribution)",
+        "7. Display Company Info and Logs",
+        "8. Delete A Company File",
+        "9. Display A Company Members Binary Relationships",
+        "10. Exit"
+    };
+    const int num_items = sizeof(menu_items) / sizeof(menu_items[0]);
+
+      printf("\n************************************************************");
+    printf("                          \n");
+    printf("                          \n");
+    printf("                        \033[1;31mINVESTMENT\033[0m \033[1;32mMODEL\033[0m               \n");
+    printf("                         \n");
+    printf("************************************************************\n");
+
+    printf("\n");
+    for (int i = 0; i < num_items; i++) {
+        int padding = (console_width - strlen(menu_items[i])) / 2;
+        printf("%*s%s\n", padding, "", menu_items[i]);
+    }
+    printf("\n-------------------------------------------------------------\n");
+}
+void display_diamond() {
+    printf("\033[1;34m"); // Set text color to bold blue
+    printf("  .     '     ,\n");
+    printf("    _________\n");
+    printf(" _ /_|_____|_\\ _\n");
+    printf("   '. \\   / .'\n");
+    printf("     '.\\ /.'\n");
+    printf("       '.'\n");
+    printf("\033[0m"); // Reset text color to default
+}
+void display_house() {
+    printf("\033[1;32m"); // Set text color to bold green
+    printf("      ':.\n");
+    printf("         []_____\n");
+    printf("        /\\      \\\n");
+    printf("    ___/  \\__/\\__\\__\n");
+    printf("---/\\___\\ |''''''|__\\-- ---\n");
+    printf("   ||'''| |''||''|''|\n");
+    printf("   ``\"\"\"`\"`\"))\"\"`\"\"`\n");
+    printf("\033[0m"); // Reset text color to default
 }
