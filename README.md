@@ -22,22 +22,4 @@ This program simulates a multi-level investment structure, allowing users to vis
 ### `file.h`
 The `file.h` header file is responsible for managing file operations in the simulator. It handles reading, writing, and manipulating data related to company members and their financial details. This file ensures that data can be saved and loaded between program sessions.
 
-#### Key Functions in `file.h`:
-- **`load_company_data()`**: Loads company data from a file.
-- **`save_company_data()`**: Saves updated company data to a file.
-- **`distribute_wealth_to_parent()`**: Handles the redistribution of wealth from a child to its parent in the hierarchy, updating files accordingly.
-  
-```c
-// file.h
 
-#ifndef FILE_H
-#define FILE_H
-
-#include "structs.h"
-
-// Function declarations
-void load_company_data(const char *filename);
-void save_company_data(const char *filename);
-void distribute_wealth_to_parent(int child_id, int parent_id, float wealth);
-
-#endif // FILE_H
